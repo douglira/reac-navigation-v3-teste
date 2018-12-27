@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {StyleSheet, Text, View, PanResponder, ScrollView, Dimensions, Animated} from 'react-native';
+import {StyleSheet, Text, View, PanResponder, ScrollView, Dimensions, Animated, TouchableOpacity, DatePickerAndroid, DatePickerIOS} from 'react-native';
 import {createAppContainer, createDrawerNavigator, createStackNavigator, DrawerItems, SafeAreaView} from 'react-navigation';
 
 
@@ -27,6 +27,7 @@ class Home extends Component {
     translateYAnim: new Animated.Value(0),
     opacityAnim: new Animated.Value(1),
     heightAnim: new Animated.Value(290),
+    date: new Date(),
   }
 
   handleScroll = (event) => {
@@ -59,6 +60,19 @@ class Home extends Component {
       ])
     ]).start();
   }
+
+  handleDate = async () => {
+    try {
+      const {action, year, month, day} = await DatePickerAndroid.open({
+        date: this.state.date
+      });
+      if (action !== DatePickerAndroid.dismissedAction) {
+        this.setState({ date: new Date(year, month, day) })
+      }
+    } catch ({code, message}) {
+      console.warn('Cannot open date picker', message);
+    }
+  }
   
   render() {
     return (
@@ -74,12 +88,11 @@ class Home extends Component {
           }}
         />
         <ScrollView onScroll={this.handleScroll} style={{flex: 1}}>
-          <Text style={{alignSelf: 'center', marginVertical: 200}}>Home</Text>
-          <Text style={{alignSelf: 'center', marginVertical: 200}}>Home</Text>
-          <Text style={{alignSelf: 'center', marginVertical: 200}}>Home</Text>
-          <Text style={{alignSelf: 'center', marginVertical: 200}}>Home</Text>
-          <Text style={{alignSelf: 'center', marginVertical: 200}}>Home</Text>
-          <Text style={{alignSelf: 'center', marginVertical: 200}}>Home</Text>
+          <TouchableOpacity onPress={this.handleDate}>
+            <View style={{ padding: 20, backgroundColor: '#CCC' }}>
+              <Text style={{ color: '#333' }}>{this.state.date.toISOString()}</Text>
+            </View>
+          </TouchableOpacity>
         </ScrollView>
       </View>
     );
@@ -97,8 +110,8 @@ const withDrawerPanResponder = (WrappedComponent) => {
     constructor(props) {
       super(props)
       this.panResponder = PanResponder.create({
-        onStartShouldSetPanResponder: (evt, gestureState) => true,
-        onStartShouldSetPanResponderCapture: (evt, gestureState) => true,
+        onStartShouldSetPanResponder: (evt, gestureState) => false,
+        onStartShouldSetPanResponderCapture: (evt, gestureState) => false,
         onMoveShouldSetPanResponder: (evt, gestureState) => true,
         onMoveShouldSetPanResponderCapture: (evt, gestureState) => true,
         onPanResponderMove: (evt, gestureState) => {
